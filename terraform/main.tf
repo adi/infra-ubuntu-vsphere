@@ -57,6 +57,13 @@ variable "vm_disk_gb" {
   type = number
 }
 
+variable "vm_initial_user" {
+  type = string
+}
+variable "vm_initial_password" {
+  type = string
+}
+
 provider "vsphere" {
   user           = var.vsphere_user
   password       = var.vsphere_password
@@ -122,4 +129,16 @@ resource "vsphere_virtual_machine" "vm" {
       ipv4_gateway = var.vm_gateway
     }
   }
+  provisioner "remote-exec" {
+    connection {
+      host = var.vm_ip
+      user = var.vm_initial_user
+      password = var.vm_initial_password
+    }
+    inline = [
+      "echo ${var.vm_initial_password} | sudo -S growpart /dev/sda 2",
+      "sudo resize2fs /dev/sda2"
+    ]
+  }
 }
+
