@@ -11,6 +11,7 @@ variable "vsphere_user" {
 }
 variable "vsphere_password" {
   type = string
+  sensitive = true
 }
 variable "vsphere_server" {
   type = string
@@ -29,6 +30,31 @@ variable "vsphere_network_name" {
 }
 variable "vsphere_folder_name" {
   type = string
+}
+
+variable "vm_name" {
+  type = string
+}
+variable "vm_domain" {
+  type = string
+}
+variable "vm_ip" {
+  type = string
+}
+variable "vm_netmask" {
+  type = number
+}
+variable "vm_gateway" {
+  type = string
+}
+variable "vm_cpus" {
+  type = number
+}
+variable "vm_ram_mb" {
+  type = number
+}
+variable "vm_disk_gb" {
+  type = number
 }
 
 provider "vsphere" {
@@ -68,8 +94,8 @@ resource "vsphere_virtual_machine" "vm" {
   datastore_id     = data.vsphere_datastore.datastore.id
   folder           = var.vsphere_folder_name
   
-  num_cpus         = 4
-  memory           = 8192
+  num_cpus         = var.vm_cpus
+  memory           = var.vm_ram_mb
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   scsi_type = data.vsphere_virtual_machine.template.scsi_type
   network_interface {
@@ -78,7 +104,7 @@ resource "vsphere_virtual_machine" "vm" {
   }
   disk {
     label = "disk0"
-    size             = data.vsphere_virtual_machine.template.disks.0.size
+    size             = var.vm_disk_gb
     eagerly_scrub    = data.vsphere_virtual_machine.template.disks.0.eagerly_scrub
     thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
   }
@@ -86,14 +112,14 @@ resource "vsphere_virtual_machine" "vm" {
     template_uuid = data.vsphere_virtual_machine.template.id
     customize {
       linux_options {
-        host_name = "example_vm"
+        host_name = var.vm_name
         domain    = "localdomain"
       }
       network_interface {
-        ipv4_address = "192.168.1.101"
-        ipv4_netmask = 24
+        ipv4_address = var.vm_ip
+        ipv4_netmask = var.vm_netmask
       }
-      ipv4_gateway = "192.168.1.1"
+      ipv4_gateway = var.vm_gateway
     }
   }
 }
