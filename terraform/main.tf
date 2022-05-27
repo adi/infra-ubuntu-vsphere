@@ -89,7 +89,7 @@ data "vsphere_virtual_machine" "template" {
 }
 
 resource "vsphere_virtual_machine" "vm" {
-  name             = "jenkins"
+  name             = var.vm_name
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
   folder           = var.vsphere_folder_name
